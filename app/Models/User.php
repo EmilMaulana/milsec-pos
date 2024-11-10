@@ -6,18 +6,23 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+USE Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+    use SoftDeletes;
+    const ROLE_SUPERADMIN = 'superadmin';
+    const ROLE_OWNER = 'owner';
+    const ROLE_STAFF = 'staff';
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
-        'name', 'last_name', 'email', 'password',
+    protected $guarded = [
+        'id',
     ];
 
     /**
@@ -75,4 +80,30 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function isSuperAdmin()
+    {
+        return $this->role === self::ROLE_SUPERADMIN;
+    }
+
+    public function isOwner()
+    {
+        return $this->role === self::ROLE_OWNER;
+    }
+
+    public function isStaff()
+    {
+        return $this->role === self::ROLE_STAFF;
+    }
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id'); // Ubah relasi ini
+    }
+
+    public function hasStore()
+    {
+        return $this->store()->exists(); // Memeriksa apakah ada store yang terkait
+    }
+
 }

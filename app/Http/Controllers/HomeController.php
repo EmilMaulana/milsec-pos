@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Transaction;
 
 class HomeController extends Controller
 {
@@ -24,13 +26,29 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $users = User::count();
+        $storeId = Auth::user()->store_id;
 
-        $widget = [
-            'users' => $users,
-            //...
-        ];
+        // Mendapatkan data pendapatan per hari untuk bulan sekarang dan 3 bulan sebelumnya
+        $revenues = Transaction::selectRaw('DATE(created_at) as date, SUM(total_price) as total')
+            ->where('store_id', $storeId)
+            ->whereBetween('created_at', [now()->subMonths(3)->startOfMonth(), now()->endOfMonth()])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
-        return view('home', compact('widget'));
+        // Format data untuk Chart.js
+        $formattedRevenues = $revenues->map(function ($revenue) {
+            return [
+                'date' => $revenue->date,
+                'total' => $revenue->total,
+            ];
+        });
+
+        return view('home', [
+            'revenues' => $formattedRevenues
+        ]);
     }
+
+
+
 }
