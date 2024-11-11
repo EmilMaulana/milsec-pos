@@ -52,7 +52,7 @@
                                 <td>{{ $product->name }}</td>
                                 <td>Rp. {{ number_format($product->base_price) }}</td>
                                 <td>Rp. {{ number_format($product->sell_price) }}</td>
-                                <td>{{ $product->disc }}%</td>
+                                <td>Rp. {{ number_format($product->disc) }}</td>
                                 <td>{{ $product->stock }}</td>
                                 <td>{{ ucwords($product->unit) }}</td>
                                 <td class="text-center">

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class WablasService
 {
@@ -27,4 +28,27 @@ class WablasService
 
         return $response->json(); // Kembalikan respons dalam format JSON
     }
+    
+
+    public function sendMessageWithFile($phone, $message, $filePath)
+    {
+        // Pastikan file dapat diakses secara publik (misalnya lewat URL)
+        $fileUrl = url(Storage::url($filePath)); // Menghasilkan URL publik untuk file PDF
+
+        $data = [
+            'phone' => $phone,
+            'document' => $fileUrl,  // Mengirimkan URL file PDF
+            'caption' => $message,   // Caption yang ingin ditampilkan
+        ];
+
+        $response = Http::withHeaders([
+            "Authorization" => $this->token,
+        ])->asForm()->post("https://bdg.wablas.com/api/send-document", $data);
+
+        // Kembalikan respons dalam format JSON
+        return $response->json();
+    }
+
+
+
 }

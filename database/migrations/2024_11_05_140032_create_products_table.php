@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('slug');
             $table->decimal('base_price', 10, 2);
             $table->decimal('sell_price', 10, 2);
-            $table->decimal('disc', 5, 2)->default(0);
+            $table->decimal('disc', 10, 2)->default(0);
             $table->integer('stock')->default(0);
             $table->string('unit')->nullable(); // Menambahkan kolom unit (satuan)
             $table->softDeletes(); // Menambahkan kolom deleted_at

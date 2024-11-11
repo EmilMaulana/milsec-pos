@@ -9,7 +9,7 @@ use App\Models\TransactionItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendTransactionMessageJob;
-use App\Models\CustomerPhone;
+use App\Models\Cashflow;
 use App\Models\User;
 
 
@@ -27,6 +27,7 @@ class Index extends Component
     public $changeAmount = 0;
     public $phone; // Pastikan $changeAmount diinisialisasi di sini
     protected $whatsappService;
+    public $totalPriceBeforeDiscount = 0; // Menyimpan total harga sebelum diskon
 
     public function mount()
     {
@@ -134,16 +135,19 @@ class Index extends Component
     public function updateTotalPrice()
     {
         $this->totalPrice = $this->getTotalPrice();
-        // Pastikan kembalian dihitung ulang setiap kali totalPrice berubah
-        $this->changeAmount = (float) $this->paymentAmount - (float) $this->totalPrice; // Konversi untuk perhitungan
+        $this->changeAmount = (float) $this->paymentAmount - (float) $this->totalPrice; // Perhitungan ulang untuk kembalian
     }
+
 
     public function getTotalPrice()
     {
         return collect($this->transactionItems)->sum(function ($item) {
-            return (float) $item['product']->sell_price * (int) $item['quantity']; // Pastikan mengkonversi ke float dan integer
+            $product = $item['product'];
+            $priceAfterDiscount = $product->sell_price - $product->disc; // Harga setelah diskon
+            return $priceAfterDiscount * (int) $item['quantity']; // Total harga setelah diskon
         });
     }
+
 
     public function confirmPayment()
     {
@@ -169,63 +173,66 @@ class Index extends Component
 
     public function completeTransaction()
     {
-        // Ambil store_id dari pengguna yang sedang login
-        $store_id = Auth::user()->store->id; // Pastikan relasi 'store' ada di model User
+        // Periksa store_id pengguna
+        $store_id = Auth::user()->store->id;
+        $this->formatPhoneNumber();
 
-        // Format nomor telepon sesuai dengan kebutuhan
-        if (substr($this->phone, 0, 1) === '0') {
-            $this->phone = '62' . substr($this->phone, 1);
-        }
+        // Hitung total harga sebelum dan setelah diskon
+        $this->totalPriceBeforeDiscount = collect($this->transactionItems)->sum(function ($item) {
+            return $item['product']->sell_price * $item['quantity'];
+        });
 
-        // Jika nomor telepon dimulai dengan "+62", hapus tanda "+" agar sesuai format "62"
-        if (substr($this->phone, 0, 3) === '+62') {
-            $this->phone = substr($this->phone, 1); // Menghapus "+" di depan
-        }
+        $this->totalPrice = $this->getTotalPrice(); // Total setelah diskon
+        $totalDiscount = $this->totalPriceBeforeDiscount - $this->totalPrice; // Total diskon
 
-        // Cek apakah nomor telepon sudah ada di tabel customer_phone
-        $customerPhone = CustomerPhone::firstOrCreate(
-            ['phone' => $this->phone]
-        );
-        
-        $this->changeAmount = (float) $this->paymentAmount - (float) $this->totalPrice;
-
+        // Buat transaksi
         $transaction = Transaction::create([
             'user_id' => Auth::id(),
             'store_id' => $store_id,
-            'total_price' => $this->totalPrice,
+            'total_price' => $this->totalPrice, // Harga setelah diskon
+            'discount' => $totalDiscount,
             'payment_method' => $this->paymentMethod,
             'payment_amount' => $this->paymentAmount,
-            'change_amount' => $this->changeAmount,
-            'phone_id' => $customerPhone->id,
+            'change_amount' => $this->paymentAmount - $this->totalPrice,
+            'phone' => $this->phone,
             'transaction_date' => now(),
         ]);
 
-        foreach ($this->transactionItems as $item) {
-            // Buat item transaksi
-            TransactionItem::create([
-                'transaction_id' => $transaction->id,
-                'product_id' => $item['product']->id,
-                'quantity' => $item['quantity'],
-                'price' => $item['product']->sell_price,
-            ]);
-
-            // Kurangi stok produk
-            $product = Product::find($item['product']->id);
-            $product->stock -= $item['quantity'];
-            $product->save();
+        foreach ($this->transactionItems as $index => $item) {
+            TransactionItem::where('transaction_id', null)
+                ->where('product_id', $item['product']->id)
+                ->update(['transaction_id' => $transaction->id]);
         }
 
-        $store_id = $transaction->store_id;
-        $usersInStore = User::where('store_id', $store_id)->get();
+        $lastCashflow = Cashflow::where('store_id', $store_id)->orderBy('id', 'desc')->first();
+        $startingBalance = $lastCashflow ? $lastCashflow->ending_balance : 0;
+        $endingBalance = $startingBalance + $this->totalPrice;
 
-        // Dispatch job untuk mengirim pesan
-        SendTransactionMessageJob::dispatch($transaction, $usersInStore, $customerPhone);
+        Cashflow::create([
+            'user_id' => Auth::id(),
+            'store_id' => $store_id,
+            'amount' => $this->totalPrice,
+            'type' => 'income',
+            'starting_balance' => $startingBalance,
+            'ending_balance' => $endingBalance,
+            'description' => 'Transaksi penjualan dengan diskon pada ' . now(),
+        ]);
 
+        SendTransactionMessageJob::dispatch($transaction, User::where('store_id', $store_id)->get());
         session()->flash('message', 'Transaksi Berhasil!');
-        return redirect()->route('transaction.index');
-
-        // Reset cart
         $this->resetCart();
+        return redirect()->route('transaction.index');
+    }
+
+
+    // Fungsi untuk memformat nomor telepon
+    private function formatPhoneNumber()
+    {
+        if (substr($this->phone, 0, 1) === '0') {
+            $this->phone = '62' . substr($this->phone, 1);
+        } elseif (substr($this->phone, 0, 3) === '+62') {
+            $this->phone = '62' . substr($this->phone, 3);
+        }
     }
 
 
@@ -245,7 +252,6 @@ class Index extends Component
                 'transactionId' => str_pad(rand(0, 99999), 8, '0', STR_PAD_LEFT),
             ]);
         }
-        
 
         // Ambil produk berdasarkan pencarian dan store_id
         $products = Product::where('store_id', $store_id)
@@ -262,6 +268,7 @@ class Index extends Component
         return view('livewire.transactions.index', [
             'products' => $products,
             'transactionId' => $transactionId,
+            'totalPriceAfterDiscount' => $this->totalPrice,
         ]);
     }
 

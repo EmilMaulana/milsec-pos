@@ -85,6 +85,12 @@
                         <span>{{ __('Riwayat Transaksi') }}</span>
                     </a>
                 </li>
+                <li class="nav-item {{ Nav::isRoute(['cashflow.index', 'cashflow.edit', 'cashflow.create']) }}">
+                    <a class="nav-link" href="{{ route('cashflow.index') }}">
+                        <i class="fa-solid fa-note-sticky"></i>
+                        <span>{{ __('Arus Kas') }}</span>
+                    </a>
+                </li>
             @elseif(auth()->user()->hasStore() && auth()->user()->role === 'owner')
                 <!-- Tampilkan semua menu untuk pengguna dengan role owner -->
                 <li class="nav-item {{ Nav::isRoute('transaction.index') }}">
@@ -97,6 +103,12 @@
                     <a class="nav-link" href="{{ route('transaction.history') }}">
                         <i class="fa-solid fa-arrows-rotate"></i>
                         <span>{{ __('Riwayat Transaksi') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item {{ Nav::isRoute(['cashflow.index', 'cashflow.edit', 'cashflow.create']) }}">
+                    <a class="nav-link" href="{{ route('cashflow.index') }}">
+                        <i class="fa-solid fa-note-sticky"></i>
+                        <span>{{ __('Arus Kas') }}</span>
                     </a>
                 </li>
                 <li class="nav-item {{ Nav::isRoute(['product.index', 'product.edit', 'staff.index']) }}">

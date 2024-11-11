@@ -31,7 +31,7 @@ class Edit extends Component
             'id_barang' => 'nullable|string|min:5|alpha_num|unique:products,id_barang,' . $this->product_id,
             'base_price' => 'required|numeric|min:0',
             'sell_price'=> 'required|numeric|gte:base_price',
-            'disc' => 'nullable|numeric|min:0|max:100',
+            'disc' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'unit' => 'required|string|max:50',
         ];

@@ -10,6 +10,8 @@ use App\Http\Controllers\TransactionsController;
 use App\Http\Controllers\HomeController;
 use App\Services\WhatsappService;
 use App\Http\Controllers\WhatsappController;
+use App\Http\Controllers\CashflowController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -45,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/transactions/history', [TransactionsController::class, 'history'])->name('transaction.history');
         Route::get('/transactions/print', [TransactionsController::class, 'print'])->name('transaction.print');
 
+        Route::get('/cashflow', [CashflowController::class, 'index'])->name('cashflow.index');
+        Route::get('/cashflow/create', [CashflowController::class, 'create'])->name('cashflow.create');
+        Route::get('/cashflow/{cashflow:id}/edit', [CashflowController::class, 'edit'])->name('cashflow.edit');
         
     });
 });

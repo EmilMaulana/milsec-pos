@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('receipt_id')->unique();
-            $table->foreignId('phone_id')->nullable()->constrained('customer_phones')->onDelete('cascade'); // Menentukan tabel 'phones' secara eksplisit
+            $table->string('phone')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('store_id')->constrained()->onDelete('cascade');
             $table->decimal('total_price', 15, 2);
-            $table->decimal('payment_amount', 15, 2); // Tambahkan kolom payment_amount
+            $table->decimal('payment_amount', 15, 2);
+            $table->decimal('disc', 10, 2)->default(0); // Tambahkan kolom payment_amount
             $table->string('payment_method'); // Tambahkan kolom payment_method
             $table->timestamp('transaction_date');
             $table->timestamps();

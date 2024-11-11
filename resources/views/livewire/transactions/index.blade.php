@@ -30,7 +30,8 @@
                                                 </div>
                                             </div>
                                             <div class="text-end">
-                                                <h6 class="text-success">Rp. {{ number_format($product->sell_price, 2) }}</h6>
+                                                <h5 class="text-success">Rp. {{ number_format($product->sell_price, 2) }}</h5>
+                                                <h6 class="text-danger text-sm">DISKON Rp. {{ number_format($product->disc, 2) }}</h6>
                                                 <small class="{{ $product->stock === 0 ? 'text-danger' : 'text-muted' }}">
                                                     Stok: {{ $product->stock }} {{ $product->stock === 0 ? '(Tidak Tersedia)' : '' }}
                                                 </small>
@@ -71,6 +72,7 @@
                                         <th>#</th>
                                         <th>Nama Produk</th>
                                         <th class="text-end">Harga</th>
+                                        <th class="text-end">Diskon</th>
                                         <th class="text-center">Jumlah</th>
                                         <th class="text-end">Total</th>
                                         <th class="text-center">Aksi</th>
@@ -82,6 +84,7 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td class="fw-semibold">{{ $item['product']->name }}</td>
                                             <td class="text-end text-success">Rp. {{ number_format($item['product']->sell_price, 2) }}</td>
+                                            <td class="text-end text-danger">Rp. {{ number_format($item['product']->disc * $item['quantity'], 2) }}</td>
                                             <td class="text-center">{{ $item['quantity'] }}</td>
                                             <td class="text-end text-primary">Rp. {{ number_format($item['product']->sell_price * $item['quantity'], 2) }}</td>
                                             <td class="text-center">
@@ -99,19 +102,19 @@
 
                         <div class="text-end mt-3">
                             <div class="card shadow-sm">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <h5 class="text-success mb-1 d-flex align-items-center">
+                                <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+                                    <h5 class="text-success mb-1 d-flex align-items-center w-100 w-md-auto">
                                         <i class="fas fa-money-bill-wave me-2"></i>
-                                        Total: Rp. <span class="fw-bold ml-1"> {{ number_format($totalPrice, 2) }}</span>
+                                        Total: Rp. <span class="fw-bold ms-1"> {{ number_format($totalPrice, 2) }}</span>
                                     </h5>
-                                    <h5 class="text-success mb-0 d-flex align-items-center">
+                                    <h5 class="text-success mb-0 d-flex align-items-center w-100 w-md-auto">
                                         <i class="fas fa-shopping-cart me-2"></i>
-                                        Total Item: <span class="fw-bold ml-1"> {{ collect($transactionItems)->sum('quantity') }}</span>
+                                        Total Item: <span class="fw-bold ms-1"> {{ collect($transactionItems)->sum('quantity') }}</span>
                                     </h5>
                                 </div>
                             </div>
                         </div>
-
+                    
                         <button class="btn btn-success btn-lg w-100 mt-3" style="border-radius: 8px;" 
                                 data-bs-toggle="modal" data-bs-target="#paymentModal"
                                 @if($totalPrice == 0) disabled @endif>

@@ -8,7 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-USE Illuminate\Support\Facades\Log;
 
 class SendTransactionMessageJob implements ShouldQueue
 {
@@ -23,11 +22,10 @@ class SendTransactionMessageJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($transaction, $usersInStore, $customerPhone)
+    public function __construct($transaction, $usersInStore)
     {
         $this->transaction = $transaction;
         $this->usersInStore = $usersInStore;
-        $this->customerPhone = $customerPhone;
     }
 
     /**
@@ -38,17 +36,7 @@ class SendTransactionMessageJob implements ShouldQueue
     public function handle()
     {
         $wablasService = new WablasService();
-
-        // Debugging: cek nilai payment_amount dan total_price
-        Log::info('Payment Amount: ' . $this->transaction->payment_amount);
-        Log::info('Total Price: ' . $this->transaction->total_price);
-
-        // Hitung kembalian
-        $changeAmount = (float) $this->transaction->payment_amount - (float) $this->transaction->total_price;
-
-        // Debugging: cek hasil perhitungan kembalian
-        Log::info('Change Amount: ' . $changeAmount);
-
+        
         // Format pesan transaksi
         $message = 
             "📢 *" . strtoupper($this->transaction->store->name) . "*\n\n" .
@@ -59,7 +47,7 @@ class SendTransactionMessageJob implements ShouldQueue
             "💵 *Total :* Rp. " . number_format($this->transaction->total_price, 2) . "\n" .
             "💳 *Metode :* " . strtoupper($this->transaction->payment_method) . "\n" .
             "💰 *Jumlah :* Rp. " . number_format($this->transaction->payment_amount, 2) . "\n" .
-            "💵 *Kembalian :* Rp. " . number_format($changeAmount, 2) . "\n\n" .
+            "💵 *Kembalian :* Rp. " . number_format($this->transaction->change_amount, 2) . "\n\n" .
             "📦 *Detail Item :*\n";
 
         foreach ($this->transaction->items as $item) {
@@ -80,7 +68,6 @@ class SendTransactionMessageJob implements ShouldQueue
         }
 
         // Kirim pesan ke customer
-        $wablasService->sendMessage($this->customerPhone->phone, $message);
+        $wablasService->sendMessage($this->transaction->phone, $message);
     }
-
 }
