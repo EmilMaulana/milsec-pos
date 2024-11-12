@@ -116,6 +116,14 @@ class Index extends Component
                         return null; // Abaikan baris header
                     }
 
+                    // Generate 'id_barang' jika tidak diisi oleh user
+                    $id_barang = 'PRD' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
+                    
+                    // Pastikan id_barang unik
+                    while (Product::where('id_barang', $id_barang)->exists()) {
+                        $id_barang = 'PRD' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
+                    }
+
                     // Ambil nama untuk slug
                     $name = $row[0];
                     // Buat slug awal
@@ -131,6 +139,7 @@ class Index extends Component
 
                     // Kembalikan instance model Product baru
                     return new Product([
+                        'id_barang'  => $id_barang,
                         'name'       => $name,
                         'base_price' => $row[1],
                         'sell_price' => $row[2],

@@ -50,34 +50,15 @@
 
                                     <hr>
 
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-github btn-user btn-block">
-                                            <i class="fab fa-github fa-fw"></i> {{ __('Login with GitHub') }}
-                                        </button>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-twitter btn-user btn-block">
-                                            <i class="fab fa-twitter fa-fw"></i> {{ __('Login with Twitter') }}
-                                        </button>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-facebook btn-user btn-block">
-                                            <i class="fab fa-facebook-f fa-fw"></i> {{ __('Login with Facebook') }}
-                                        </button>
-                                    </div>
                                 </form>
 
-                                <hr>
-
-                                @if (Route::has('password.request'))
+                                {{-- @if (Route::has('password.request'))
                                     <div class="text-center">
                                         <a class="small" href="{{ route('password.request') }}">
                                             {{ __('Forgot Password?') }}
                                         </a>
                                     </div>
-                                @endif
+                                @endif --}}
 
                                 @if (Route::has('register'))
                                     <div class="text-center">
@@ -88,6 +69,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="text-center">
+                <small class="text-white">Dibuat dan dikembangkan oleh <a class="text-danger" href="https://instagram.com/emilmaul_" target="_blank">Emil Maulana</a>. {{ now()->year }}</small>
             </div>
         </div>
     </div>

@@ -10,7 +10,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'POS' }}</title>
+    <title>{{ $title ?? 'CASH BRO' }}</title>
 
     @livewireStyles
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -48,7 +48,7 @@
                 <i class="fas fa-laugh-wink"></i>
             </div>
             <div class="sidebar-brand-text mx-3">
-                <h4 class="pt-2 font-weight-semibold">MIL <sup>POS</sup></h4>
+                <h4 class="pt-2 font-weight-bold">CASH BRO </h4>
             </div>
         </a>
 

@@ -70,6 +70,9 @@
                     </div>
                 </div>
             </div>
+            <div class="text-center">
+                <small class="text-white">Dibuat dan dikembangkan oleh <a class="text-danger" href="https://instagram.com/emilmaul_" target="_blank">Emil Maulana</a>. {{ now()->year }}</small>
+            </div>
         </div>
     </div>
 </div>

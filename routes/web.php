@@ -24,7 +24,7 @@ use App\Http\Controllers\CashflowController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 // Route::resource('products', ProductController::class)->middleware('auth');

@@ -25,15 +25,23 @@ class Index extends Component
     public $paymentMethod;
     public $paymentAmount = 0; // Inisialisasi dengan 0
     public $changeAmount = 0;
+    public $totalPriceBeforeDiscount = 0;
     public $phone; // Pastikan $changeAmount diinisialisasi di sini
     protected $whatsappService;
-    public $totalPriceBeforeDiscount = 0; // Menyimpan total harga sebelum diskon
+    public $paymentConfirmed = false;
 
     public function mount()
     {
         $this->totalPrice = $this->getTotalPrice();
         $this->paymentMethod = 'cash';
-        
+
+    }
+
+    public function dehydrate()
+    {
+        if ($this->paymentConfirmed = false) {
+            $this->updateTotalPrice();
+        }
     }
     
     public function updatedPaymentAmount($value)
@@ -173,9 +181,19 @@ class Index extends Component
 
     public function completeTransaction()
     {
-        // Periksa store_id pengguna
+        $this->paymentConfirmed = true;
+
+        
+        // Ambil store_id dari pengguna yang sedang login
         $store_id = Auth::user()->store->id;
-        $this->formatPhoneNumber();
+
+        // Format nomor telepon
+        if (substr($this->phone, 0, 1) === '0') {
+            $this->phone = '62' . substr($this->phone, 1);
+        }
+        if (substr($this->phone, 0, 3) === '+62') {
+            $this->phone = substr($this->phone, 1);
+        }
 
         // Hitung total harga sebelum dan setelah diskon
         $this->totalPriceBeforeDiscount = collect($this->transactionItems)->sum(function ($item) {
@@ -184,55 +202,63 @@ class Index extends Component
 
         $this->totalPrice = $this->getTotalPrice(); // Total setelah diskon
         $totalDiscount = $this->totalPriceBeforeDiscount - $this->totalPrice; // Total diskon
+        
+        // Hitung kembalian
+        $changeAmount = $this->paymentAmount - $this->totalPrice;
 
-        // Buat transaksi
         $transaction = Transaction::create([
             'user_id' => Auth::id(),
             'store_id' => $store_id,
-            'total_price' => $this->totalPrice, // Harga setelah diskon
-            'discount' => $totalDiscount,
+            'total_price' => $this->totalPrice,
             'payment_method' => $this->paymentMethod,
             'payment_amount' => $this->paymentAmount,
-            'change_amount' => $this->paymentAmount - $this->totalPrice,
+            'disc' => $totalDiscount,
+            'change_amount' => $changeAmount,
             'phone' => $this->phone,
             'transaction_date' => now(),
         ]);
 
-        foreach ($this->transactionItems as $index => $item) {
-            TransactionItem::where('transaction_id', null)
-                ->where('product_id', $item['product']->id)
-                ->update(['transaction_id' => $transaction->id]);
+        // Proses item transaksi
+        foreach ($this->transactionItems as $item) {
+            TransactionItem::create([
+                'transaction_id' => $transaction->id,
+                'product_id' => $item['product']->id,
+                'quantity' => $item['quantity'],
+                'price' => $item['product']->sell_price,
+            ]);
+
+            // Kurangi stok produk
+            $product = Product::find($item['product']->id);
+            $product->save();
         }
 
+        // Hitung saldo awal dari cashflow terakhir (jika ada)
         $lastCashflow = Cashflow::where('store_id', $store_id)->orderBy('id', 'desc')->first();
-        $startingBalance = $lastCashflow ? $lastCashflow->ending_balance : 0;
-        $endingBalance = $startingBalance + $this->totalPrice;
+        $startingBalance = $lastCashflow ? $lastCashflow->ending_balance : 0; // Jika tidak ada cashflow sebelumnya, saldo awal adalah 0
+
+        // Catat pemasukan ke tabel cashflow
+        $endingBalance = $startingBalance + $this->totalPrice; // Hitung saldo akhir
 
         Cashflow::create([
             'user_id' => Auth::id(),
             'store_id' => $store_id,
-            'amount' => $this->totalPrice,
-            'type' => 'income',
-            'starting_balance' => $startingBalance,
-            'ending_balance' => $endingBalance,
-            'description' => 'Transaksi penjualan dengan diskon pada ' . now(),
+            'amount' => $this->totalPrice, // Jumlah pemasukan
+            'type' => 'income', // Tipe transaksi adalah pemasukan
+            'starting_balance' => $startingBalance, // Ambil saldo awal
+            'ending_balance' => $endingBalance, // Hitung saldo akhir
+            'description' => 'Transaksi penjualan pada ' . now(), // Deskripsi transaksi
         ]);
 
-        SendTransactionMessageJob::dispatch($transaction, User::where('store_id', $store_id)->get());
+        $usersInStore = User::where('store_id', $store_id)->get();
+
+        // Dispatch job untuk mengirim pesan
+        SendTransactionMessageJob::dispatch($transaction, $usersInStore);
+
         session()->flash('message', 'Transaksi Berhasil!');
-        $this->resetCart();
         return redirect()->route('transaction.index');
-    }
 
-
-    // Fungsi untuk memformat nomor telepon
-    private function formatPhoneNumber()
-    {
-        if (substr($this->phone, 0, 1) === '0') {
-            $this->phone = '62' . substr($this->phone, 1);
-        } elseif (substr($this->phone, 0, 3) === '+62') {
-            $this->phone = '62' . substr($this->phone, 3);
-        }
+        // Reset cart
+        $this->resetCart();
     }
 
 
@@ -252,6 +278,7 @@ class Index extends Component
                 'transactionId' => str_pad(rand(0, 99999), 8, '0', STR_PAD_LEFT),
             ]);
         }
+        
 
         // Ambil produk berdasarkan pencarian dan store_id
         $products = Product::where('store_id', $store_id)
@@ -268,7 +295,6 @@ class Index extends Component
         return view('livewire.transactions.index', [
             'products' => $products,
             'transactionId' => $transactionId,
-            'totalPriceAfterDiscount' => $this->totalPrice,
         ]);
     }
 

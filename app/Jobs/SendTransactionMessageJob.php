@@ -51,10 +51,17 @@ class SendTransactionMessageJob implements ShouldQueue
             "📦 *Detail Item :*\n";
 
         foreach ($this->transaction->items as $item) {
-            $message .= "- {$item->product->name}: {$item->quantity} pcs\n";
+            
+            $discountFinal = $item->product->disc * $item->quantity;
+            $message .= "- {$item->product->name}: {$item->quantity} \n\n";
         }
 
-        $message .= "\n\n_*note: pesan ini dikirim otomatis oleh sistem kami_";
+        // Tampilkan diskon jika ada
+        if ($discountFinal > 0) {
+            $message .= "  🏷️ Anda telah menghemat Rp. " . number_format($discountFinal, 2) . " \n\n";
+        }
+
+        $message .= "\n_*note: pesan ini dikirim otomatis oleh sistem kami_";
 
         // Kirim pesan ke setiap pengguna di toko yang sama
         foreach ($this->usersInStore as $user) {
