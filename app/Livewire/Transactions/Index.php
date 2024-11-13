@@ -35,12 +35,23 @@ class Index extends Component
         $this->totalPrice = $this->getTotalPrice();
         $this->paymentMethod = 'cash';
 
+        // Jika transaksi belum dikonfirmasi, kembalikan stok saat halaman dimuat kembali
+        
     }
 
-    public function dehydrate()
+    public function restoreStock()
     {
-        if ($this->paymentConfirmed = false) {
-            $this->updateTotalPrice();
+        // Pastikan ada item transaksi sebelum mencoba mengembalikan stok
+        if (!empty($this->transactionItems)) {
+            foreach ($this->transactionItems as $item) {
+                // Ambil produk berdasarkan ID
+                $product = Product::find($item['product']->id);
+                if ($product) {
+                    // Kembalikan stok produk
+                    $product->increment('stock', $item['quantity']);
+                    $product->save();
+                }
+            }
         }
     }
     
@@ -63,7 +74,7 @@ class Index extends Component
         }
 
         // Kurangi stok produk di database jika stok mencukupi
-        $product->decrement('stock', 1);
+        // $product->decrement('stock', 1);
 
         // Periksa apakah produk sudah ada dalam daftar transaksi
         $existingItemIndex = collect($this->transactionItems)->search(function ($item) use ($productId) {
@@ -101,7 +112,7 @@ class Index extends Component
         $this->transactionItems[$index]['quantity']++;
         
         // Kurangi stok produk di database
-        $product->decrement('stock', 1);
+        // $product->decrement('stock', 1);
 
         $this->updateTotalPrice();
     }
@@ -115,7 +126,7 @@ class Index extends Component
         if ($this->transactionItems[$index]['quantity'] > 1) {
             $this->transactionItems[$index]['quantity']--;
             // Tambah stok produk ke database
-            $product->increment('stock', 1);
+            // $product->increment('stock', 1);
         } else {
             // Jika kuantitas 1, hapus item dari transaksi
             $this->removeTransactionItem($index);
@@ -182,7 +193,6 @@ class Index extends Component
     public function completeTransaction()
     {
         $this->paymentConfirmed = true;
-
         
         // Ambil store_id dari pengguna yang sedang login
         $store_id = Auth::user()->store->id;
@@ -229,6 +239,8 @@ class Index extends Component
 
             // Kurangi stok produk
             $product = Product::find($item['product']->id);
+            // Kurangi stok produk di database
+            $product->decrement('stock', 1);
             $product->save();
         }
 
