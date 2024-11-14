@@ -16,6 +16,7 @@ use App\Models\User;
 class Index extends Component
 {
     public $isPaymentConfirmed = false;
+    public $password;
     public $transactionProcessed = false; // Set agar memicu cetak struk
     public $customer_name;
     public $transactionItems = [];
