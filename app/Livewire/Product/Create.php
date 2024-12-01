@@ -41,7 +41,8 @@ class Create extends Component
         // Generate 'id_barang' jika tidak diisi oleh user
         $id_barang = $this->id_barang ?: 'PRD' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
 
-        Product::create([
+        // Simpan produk baru ke database
+        $product = Product::create([
             'id_barang' => $id_barang,
             'name' => $this->name,
             'slug' => $slug,
@@ -53,6 +54,9 @@ class Create extends Component
             'store_id' => $store_id, // Menyimpan store_id dari pengguna yang login
         ]);
 
+        // Log aktivitas untuk mencatat produk baru ditambahkan
+        logActivity('User menambahkan produk baru: ' . $product->name . ' dengan ID barang ' . $product->id_barang);
+
         // Reset input fields
         $this->reset(['name', 'id_barang', 'base_price', 'sell_price', 'stock' , 'disc', 'unit']);
 
@@ -62,6 +66,7 @@ class Create extends Component
         // Redirect to the same page to display SweetAlert
         return redirect()->route('product.index');
     }
+
 
 
     public function render()

@@ -67,8 +67,9 @@ class Edit extends Component
         // Generate 'id_barang' jika tidak diisi oleh user
         $id_barang = $this->id_barang ?: 'PRD' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
 
-        // Update data produk
-        $product->update([
+        // Cek atribut yang diubah
+        $originalData = $product->getAttributes(); // Data awal produk sebelum update
+        $updatedData = [
             'name' => $this->name,
             'id_barang' => $id_barang,
             'slug' => $slug,
@@ -78,7 +79,31 @@ class Edit extends Component
             'stock' => $this->stock,
             'unit' => $this->unit,
             'store_id' => $store_id,
-        ]);
+        ];
+
+        // Tentukan atribut yang berubah
+        $changes = [];
+        foreach ($updatedData as $key => $value) {
+            if ($originalData[$key] !== $value) {
+                $changes[$key] = [
+                    'before' => $originalData[$key],
+                    'after' => $value,
+                ];
+            }
+        }
+
+        // Update data produk
+        $product->update($updatedData);
+
+        // Log aktivitas untuk mencatat pembaruan produk jika ada perubahan
+        if (!empty($changes)) {
+            $changeDescriptions = [];
+            foreach ($changes as $field => $change) {
+                $changeDescriptions[] = "Field '$field' diubah dari '{$change['before']}' menjadi '{$change['after']}'";
+            }
+            $changeLog = implode(', ', $changeDescriptions);
+            logActivity('User memperbarui produk: ' . $product->name . ' dengan ID barang ' . $product->id_barang . '. Perubahan: ' . $changeLog);
+        }
 
         // Set flash message for success
         session()->flash('message', 'Produk berhasil diupdate!');
@@ -86,6 +111,7 @@ class Edit extends Component
         // Redirect to the products index page to display SweetAlert
         return redirect()->route('product.index');
     }
+
 
 
     public function render()

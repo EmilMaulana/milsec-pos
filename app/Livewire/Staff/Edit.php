@@ -50,7 +50,10 @@ class Edit extends Component
         }
 
         $user = User::findOrFail($this->userId);
-        
+
+        // Membuat array data lama untuk perbandingan
+        $originalData = $user->getOriginal();
+
         // Update data pengguna
         $user->update([
             'name' => $this->name,
@@ -62,9 +65,23 @@ class Edit extends Component
             'password' => $this->password ? Hash::make($this->password) : $user->password, // Hanya update password jika diisi
         ]);
 
+        // Log perubahan yang terjadi jika ada perubahan
+        $changes = [];
+        foreach ($user->getAttributes() as $key => $value) {
+            if ($originalData[$key] !== $value) {
+                $changes[] = $key . ' dari "' . $originalData[$key] . '" menjadi "' . $value . '"';
+            }
+        }
+
+        if (!empty($changes)) {
+            $changeDetails = implode(', ', $changes);
+            logActivity('User memperbarui data staff: ' . $user->name . '. Perubahan: ' . $changeDetails);
+        }
+
         session()->flash('message', 'Staff berhasil diperbarui.');
         return redirect()->route('staff.index');
     }
+
 
 
     public function getStoreProperty()

@@ -35,7 +35,7 @@ class Create extends Component
 
         // Jika nomor telepon dimulai dengan "+62", hapus tanda "+" agar sesuai format "62"
         if (substr($this->phone, 0, 3) === '+62') {
-            return substr($this->phone, 1); // Menghapus "+" di depan
+            $this->phone = substr($this->phone, 1); // Menghapus "+" di depan
         }
 
         // Generate slug dari nama toko
@@ -56,9 +56,13 @@ class Create extends Component
         $user->store_id = $store->id; // Set store_id ke ID toko yang baru dibuat
         $user->save(); // Simpan perubahan
 
+        // Log aktivitas pembuatan toko
+        logActivity('User ' . auth()->user()->name . ' membuat toko baru dengan nama: ' . $store->name . '.');
+
         session()->flash('message', 'Toko berhasil dibuat!');
         return redirect()->route('store.index');
     }
+
 
 
     public function render()

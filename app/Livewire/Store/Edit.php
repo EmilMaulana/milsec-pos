@@ -36,6 +36,7 @@ class Edit extends Component
                 'regex:/^(\\+62|0)[0-9]{8,14}$/'
             ],
         ]);
+
         // Convert phone number to +62 format if it starts with 0
         if (substr($this->phone, 0, 1) === '0') {
             $this->phone = '62' . substr($this->phone, 1);
@@ -43,10 +44,14 @@ class Edit extends Component
 
         // Jika nomor telepon dimulai dengan "+62", hapus tanda "+" agar sesuai format "62"
         if (substr($this->phone, 0, 3) === '+62') {
-            return substr($this->phone, 1); // Menghapus "+" di depan
+            $this->phone = substr($this->phone, 1); // Menghapus "+" di depan
         }
+
         // Cari toko berdasarkan ID
         $store = ModelStore::findOrFail($this->store_id);
+
+        // Simpan data lama untuk perbandingan
+        $oldData = $store->getOriginal();
 
         // Generate slug dari nama toko
         $slug = Str::slug($this->name);
@@ -60,12 +65,31 @@ class Edit extends Component
             'phone' => $this->phone,
         ]);
 
+        // Deteksi perubahan dan buat daftar perubahan
+        $changes = [];
+        foreach ($store->getDirty() as $key => $value) {
+            $changes[$key] = [
+                'old' => $oldData[$key] ?? null,
+                'new' => $value,
+            ];
+        }
+
+        // Log aktivitas perubahan data
+        if (!empty($changes)) {
+            $changeLog = 'User ' . auth()->user()->name . ' memperbarui toko dengan nama: ' . $store->name . '. Perubahan: ';
+            foreach ($changes as $field => $change) {
+                $changeLog .= "Field '{$field}' diubah dari '{$change['old']}' menjadi '{$change['new']}'; ";
+            }
+            logActivity($changeLog);
+        }
+
         // Flash message untuk notifikasi
         session()->flash('message', 'Toko berhasil diperbarui!');
 
         // Redirect ke halaman daftar toko atau halaman yang diinginkan
         return redirect()->route('store.index');
     }
+
 
     public function render()
     {

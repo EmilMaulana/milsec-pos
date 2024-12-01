@@ -60,11 +60,11 @@ class Index extends Component
 
         // Jika nomor telepon dimulai dengan "+62", hapus tanda "+" agar sesuai format "62"
         if (substr($this->phone, 0, 3) === '+62') {
-            return substr($this->phone, 1); // Menghapus "+" di depan
+            $this->phone = substr($this->phone, 1); // Menghapus "+" di depan
         }
-        
+
         // Menyimpan staff baru
-        User::create([
+        $newUser = User::create([
             'name' => $this->name,
             'last_name' => $this->last_name,
             'email' => $this->email,
@@ -74,9 +74,13 @@ class Index extends Component
             'role' => 'staff', // Menetapkan role sebagai staff
         ]);
 
+        // Log aktivitas untuk mencatat pembuatan data staff
+        logActivity('User menambahkan staff baru: ' . $newUser->name . ' dengan email ' . $newUser->email);
+
         session()->flash('message', 'Staff berhasil ditambahkan.');
         return redirect()->route('staff.index');
     }
+
 
 
     public function getStoreProperty()

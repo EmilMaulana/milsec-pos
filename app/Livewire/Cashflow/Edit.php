@@ -103,23 +103,49 @@ class Edit extends Component
         // Hitung ulang saldo akhir sebelum disimpan
         $this->calculateEndingBalance();
 
-        // Update data cashflow
-        $cashflow->update([
+        // Simpan data awal untuk perbandingan
+        $originalData = $cashflow->getAttributes(); // Data sebelum update
+        $updatedData = [
             'starting_balance' => $this->starting_balance,
             'amount' => $this->amount,
             'type' => $this->type,
             'ending_balance' => $this->ending_balance,
             'description' => $this->description,
-        ]);
+        ];
+
+        // Tentukan atribut yang berubah
+        $changes = [];
+        foreach ($updatedData as $key => $value) {
+            if (isset($originalData[$key]) && $originalData[$key] !== $value) {
+                $changes[$key] = [
+                    'before' => $originalData[$key],
+                    'after' => $value,
+                ];
+            }
+        }
+
+        // Update data cashflow
+        $cashflow->update($updatedData);
+
+        // Log aktivitas untuk mencatat pembaruan jika ada perubahan
+        if (!empty($changes)) {
+            $changeDescriptions = [];
+            foreach ($changes as $field => $change) {
+                $changeDescriptions[] = "Field '$field' diubah dari '{$change['before']}' menjadi '{$change['after']}'";
+            }
+            $changeLog = implode(', ', $changeDescriptions);
+            logActivity('User memperbarui data cashflow: ' . $this->type . ' sebesar ' . $this->amount . '. Perubahan: ' . $changeLog);
+        }
 
         // Update saldo awal setelah transaksi
         $this->starting_balance = $this->ending_balance;
 
         session()->flash('message', 'Data cashflow berhasil diperbarui!');
-        
+
         // Redirect ke halaman indeks cashflow untuk melihat data yang sudah diupdate
         return redirect()->route('cashflow.index');
     }
+
 
 
     public function render()

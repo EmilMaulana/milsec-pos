@@ -119,6 +119,9 @@ class Create extends Component
             'description' => $this->description,
         ]);
 
+        // Log aktivitas setelah data berhasil disimpan
+        logActivity('User menambahkan data cashflow: ' . $this->type . ' sebesar ' . $this->amount);
+
         // Reset form setelah simpan
         $this->reset(['amount', 'type', 'description']);
         $this->starting_balance = $this->ending_balance; // Update saldo awal setelah transaksi

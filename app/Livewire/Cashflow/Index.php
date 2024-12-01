@@ -15,6 +15,12 @@ class Index extends Component
 
     public function render()
     {
+        // $user = Auth::user();
+
+        // // Log aktivitas saat user membuka halaman cashflow
+        // logActivity('User melihat halaman cashflow.');
+        // logActivity('User dengan email ' . $user->email . ' melihat halaman cashflow.');
+
         $store_id = Auth::user()->store->id;
         
         // Tampilkan cashflow hanya untuk store yang terkait dengan user
