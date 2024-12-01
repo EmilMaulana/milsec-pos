@@ -11,13 +11,10 @@
                         <div class="list-group" style="height: 500px; overflow-y: auto;">
                             <div wire:poll.5s>
                                 @forelse ($products as $product)
-                                    <div class="card mb-2 shadow-sm" 
-                                        style="cursor: {{ $product->stock > 0 ? 'pointer' : 'not-allowed' }}; border: 1px solid #dee2e6; {{ $product->stock === 0 ? 'opacity: 0.6;' : '' }}"
-                                        wire:click="{{ $product->stock > 0 ? 'addTransactionItem(' . $product->id . ')' : '' }}" 
-                                        @if($product->stock === 0) 
-                                            class="disabled" 
-                                            aria-disabled="true" 
-                                        @endif>
+                                    <div wire:key="product-{{ $product->id }}" 
+                                         class="card mb-2 shadow-sm" 
+                                         style="cursor: {{ $product->stock > 0 ? 'pointer' : 'not-allowed' }}; border: 1px solid #dee2e6; {{ $product->stock === 0 ? 'opacity: 0.6;' : '' }}"
+                                         wire:click="{{ $product->stock > 0 ? 'addTransactionItem(' . $product->id . ')' : '' }}">
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" 
@@ -47,7 +44,7 @@
                                         </div>
                                     </div>
                                 @endforelse
-                            </div>
+                            </div>                                                              
                         </div>
                     </div>
 
@@ -183,6 +180,7 @@
             </div>
         </div>
     </div>
+    
     
     @if (session()->has('message'))
         <script>
