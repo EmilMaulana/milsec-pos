@@ -24,8 +24,7 @@ class Index extends Component
     public function render()
     {
         // Ambil staff berdasarkan store_id dan pencarian
-        $staff = User::where('role', 'staff')
-                    ->where('store_id', $this->store_id) // Menyaring staff berdasarkan toko
+        $staff = User::where('store_id', $this->store_id) // Menyaring staff berdasarkan toko
                     ->where(function($query) {
                         $query->where('name', 'like', '%' . $this->search . '%')
                             ->orWhere('last_name', 'like', '%' . $this->search . '%')

@@ -4,10 +4,11 @@ namespace App\Livewire\Staff;
 
 use Livewire\Component;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class Edit extends Component
 {
-    public $name, $last_name, $email, $phone, $password, $password_confirmation, $userId, $store_id; // Properti untuk input form
+    public $name, $role, $last_name, $email, $phone, $password, $password_confirmation, $userId, $store_id; // Properti untuk input form
 
     public function mount(User $user)
     {   
@@ -16,6 +17,7 @@ class Edit extends Component
         $this->last_name = $user->last_name;
         $this->email = $user->email;
         $this->phone = $user->phone;
+        $this->role = $user->role;
         // Reset password fields, karena tidak ingin memuat password yang ada
         $this->password = '';
         $this->password_confirmation = '';
@@ -32,8 +34,9 @@ class Edit extends Component
                 'string',
                 'regex:/^(\\62|0)[0-9]{8,14}$/'
             ],
-            'password' => 'string|min:6|confirmed',
-            'password_confirmation' => 'string|min:6', // Pastikan konfirmasi juga divalidasi
+            'password' => 'nullable|string|min:6|confirmed', // Password tidak wajib diisi
+            'password_confirmation' => 'nullable|string|min:6', // Pastikan konfirmasi juga divalidasi
+            'role' => 'required|in:staff,owner', // Validasi untuk role
         ]);
 
         // Convert phone number to +62 format if it starts with 0
@@ -43,23 +46,26 @@ class Edit extends Component
 
         // Jika nomor telepon dimulai dengan "+62", hapus tanda "+" agar sesuai format "62"
         if (substr($this->phone, 0, 3) === '+62') {
-            return substr($this->phone, 1); // Menghapus "+" di depan
+            $this->phone = substr($this->phone, 1); // Menghapus "+" di depan
         }
 
         $user = User::findOrFail($this->userId);
+        
+        // Update data pengguna
         $user->update([
             'name' => $this->name,
             'last_name' => $this->last_name, // Jangan lupa untuk meng-update last_name jika perlu
             'email' => $this->email,
             'phone' => $this->phone,
-            'password' => $this->password,
+            'role' => $this->role, // Menyimpan role ke database
             // Jika ingin merubah password saat update, tambahkan logika berikut
-            // 'password' => Hash::make($this->password), // Tambahkan jika password diubah
+            'password' => $this->password ? Hash::make($this->password) : $user->password, // Hanya update password jika diisi
         ]);
 
         session()->flash('message', 'Staff berhasil diperbarui.');
         return redirect()->route('staff.index');
     }
+
 
     public function getStoreProperty()
     {

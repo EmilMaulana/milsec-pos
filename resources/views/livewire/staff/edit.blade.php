@@ -25,7 +25,8 @@
                                 @error('last_name') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                         </div>
-                    </div>
+                        
+                    </div>  
             
                     <div class="row">
                         <div class="col-lg-6">
@@ -52,8 +53,12 @@
                                 @error('phone') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="form-group focused">
-                                <label class="form-control-label" for="store_id">Toko<span class="small text-danger">*</span></label>
-                                <input type="text" disabled id="store_id" class="form-control" placeholder="Toko" value="{{ $this->store->name }}">
+                                <label class="form-control-label" for="role">Role<span class="small text-danger">*</span></label>
+                                <select id="role" class="form-control" wire:model="role">
+                                    <option value="" disabled selected>Pilih Role</option>
+                                    <option value="staff">Staff</option>
+                                    <option value="owner">Owner</option>
+                                </select>
                             </div>
                         </div>
                         <div class="col-lg-6">
