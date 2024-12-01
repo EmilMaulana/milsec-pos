@@ -8,6 +8,7 @@ if (!function_exists('logActivity')) {
     {
         ActivityLog::create([
             'user_id' => Auth::id(),
+            'store_id' => Auth::user()->store_id,
             'activity' => $activity,
             'ip_address' => request()->ip(),
             'user_agent' => request()->header('User-Agent'),

@@ -28,6 +28,10 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+Route::get('/activity-log', function () {
+    return view('activity-log');
+})->name('activity-log')->middleware('auth');
+
 // Route::resource('products', ProductController::class)->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {

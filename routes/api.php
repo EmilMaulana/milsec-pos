@@ -30,36 +30,36 @@ use App\Http\Controllers\Api\ProductController;
 
 
 // Endpoint untuk produk
-Route::middleware('api')->prefix('dashboard')->group(function () {
-    Route::get('/product', [ProductController::class, 'index'])->name('product.index');
-    Route::post('/product', [ProductController::class, 'store'])->name('product.store');
-    Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name('product.show');
-    Route::put('/product/{product:slug}', [ProductController::class, 'update'])->name('product.update');
-    Route::delete('/product/{product:slug}', [ProductController::class, 'destroy'])->name('product.destroy');
-    Route::get('/product/export', [ProductController::class, 'export'])->name('product.export');
-    Route::get('/product/template', [ProductController::class, 'template'])->name('product.template');
-    Route::get('/product/{id}/barcode', [ProductController::class, 'generateBarcode'])->name('product.barcode');
-    Route::get('/product/{id}/barcode/download', [ProductController::class, 'downloadBarcode'])->name('product.barcode.download');
+// Route::middleware('api')->prefix('dashboard')->group(function () {
+//     Route::get('/product', [ProductController::class, 'index'])->name('product.index');
+//     Route::post('/product', [ProductController::class, 'store'])->name('product.store');
+//     Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name('product.show');
+//     Route::put('/product/{product:slug}', [ProductController::class, 'update'])->name('product.update');
+//     Route::delete('/product/{product:slug}', [ProductController::class, 'destroy'])->name('product.destroy');
+//     Route::get('/product/export', [ProductController::class, 'export'])->name('product.export');
+//     Route::get('/product/template', [ProductController::class, 'template'])->name('product.template');
+//     Route::get('/product/{id}/barcode', [ProductController::class, 'generateBarcode'])->name('product.barcode');
+//     Route::get('/product/{id}/barcode/download', [ProductController::class, 'downloadBarcode'])->name('product.barcode.download');
 
-    // // Endpoint untuk transaksi
-    // Route::get('/transactions', [TransactionsController::class, 'index'])->name('transaction.index');
-    // Route::get('/transactions/history', [TransactionsController::class, 'history'])->name('transaction.history');
-    // Route::get('/transactions/print', [TransactionsController::class, 'print'])->name('transaction.print');
+//     // // Endpoint untuk transaksi
+//     // Route::get('/transactions', [TransactionsController::class, 'index'])->name('transaction.index');
+//     // Route::get('/transactions/history', [TransactionsController::class, 'history'])->name('transaction.history');
+//     // Route::get('/transactions/print', [TransactionsController::class, 'print'])->name('transaction.print');
 
-    // // Endpoint untuk cashflow
-    // Route::get('/cashflow', [CashflowController::class, 'index'])->name('cashflow.index');
-    // Route::post('/cashflow', [CashflowController::class, 'store'])->name('cashflow.store');
-    // Route::get('/cashflow/{cashflow:id}', [CashflowController::class, 'show'])->name('cashflow.show');
-    // Route::put('/cashflow/{cashflow:id}', [CashflowController::class, 'update'])->name('cashflow.update');
-    // Route::delete('/cashflow/{cashflow:id}', [CashflowController::class, 'destroy'])->name('cashflow.destroy');
+//     // // Endpoint untuk cashflow
+//     // Route::get('/cashflow', [CashflowController::class, 'index'])->name('cashflow.index');
+//     // Route::post('/cashflow', [CashflowController::class, 'store'])->name('cashflow.store');
+//     // Route::get('/cashflow/{cashflow:id}', [CashflowController::class, 'show'])->name('cashflow.show');
+//     // Route::put('/cashflow/{cashflow:id}', [CashflowController::class, 'update'])->name('cashflow.update');
+//     // Route::delete('/cashflow/{cashflow:id}', [CashflowController::class, 'destroy'])->name('cashflow.destroy');
 
-    // // Endpoint untuk absensi
-    // Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    // Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-    // Route::get('/attendance/{attendance:id}', [AttendanceController::class, 'show'])->name('attendance.show');
-    // Route::put('/attendance/{attendance:id}', [AttendanceController::class, 'update'])->name('attendance.update');
-    // Route::delete('/attendance/{attendance:id}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
-});
+//     // // Endpoint untuk absensi
+//     // Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+//     // Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+//     // Route::get('/attendance/{attendance:id}', [AttendanceController::class, 'show'])->name('attendance.show');
+//     // Route::put('/attendance/{attendance:id}', [AttendanceController::class, 'update'])->name('attendance.update');
+//     // Route::delete('/attendance/{attendance:id}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
+// });
 
 // // Endpoint untuk laporan, store, dan staff yang hanya bisa diakses oleh owner
 // Route::middleware(['auth:api', 'owner'])->prefix('dashboard')->group(function () {

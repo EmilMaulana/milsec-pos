@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable(); // User yang melakukan aktivitas
+            $table->unsignedBigInteger('store_id')->nullable(); // User yang melakukan aktivitas
             $table->string('activity'); // Deskripsi aktivitas
             $table->ipAddress('ip_address')->nullable(); // IP pengguna
             $table->string('user_agent')->nullable(); // Browser atau perangkat pengguna
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('store_id')->references('id')->on('stores')->onDelete('cascade');
         });
     }
 
