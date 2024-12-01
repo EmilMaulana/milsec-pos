@@ -16,10 +16,13 @@ class History extends Component
 
     public function render()
     {
-        $transaction = Transaction::latest()->paginate(5);
-        // Mengirimkan data transaksi ke view dengan paginasi
+        $transaction = Transaction::where('user_id', auth()->id())
+            ->latest()
+            ->paginate(5);
+
         return view('livewire.transactions.history', [
             'transactions' => $transaction
         ]);
     }
+
 }

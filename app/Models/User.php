@@ -106,4 +106,10 @@ class User extends Authenticatable
         return $this->store()->exists(); // Memeriksa apakah ada store yang terkait
     }
 
+    // Relasi dengan Attendance
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }   
+
 }

@@ -13,6 +13,12 @@
     <title>{{ $title ?? 'CASH BRO' }}</title>
 
     @livewireStyles
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Fonts -->
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -67,7 +73,7 @@
 
         <!-- Heading -->
         <div class="sidebar-heading">
-            {{ __('Settings') }}
+            {{ __('Menu') }}
         </div>
 
         @if(auth()->check())
@@ -91,6 +97,12 @@
                         <span>{{ __('Arus Kas') }}</span>
                     </a>
                 </li>
+                <li class="nav-item {{ Nav::isRoute(['attendance.index', 'attendance.create']) }}">
+                    <a class="nav-link" href="{{ route('attendance.index') }}">
+                        <i class="fa-solid fa-user-check"></i>
+                        <span>{{ __('Absensi') }}</span>
+                    </a>
+                </li>                
             @elseif(auth()->user()->hasStore() && auth()->user()->role === 'owner')
                 <!-- Tampilkan semua menu untuk pengguna dengan role owner -->
                 <li class="nav-item {{ Nav::isRoute('transaction.index') }}">
@@ -111,6 +123,13 @@
                         <span>{{ __('Arus Kas') }}</span>
                     </a>
                 </li>
+                <li class="nav-item {{ Nav::isRoute(['attendance.index', 'attendance.create']) }}">
+                    <a class="nav-link" href="{{ route('attendance.index') }}">
+                        <i class="fa-solid fa-user-check"></i>
+                        <span>{{ __('Absensi') }}</span>
+                    </a>
+                </li>
+                
                 <li class="nav-item {{ Nav::isRoute(['product.index', 'product.edit', 'staff.index']) }}">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#manajemen"
                         aria-expanded="true" aria-controls="manajemen">
@@ -303,6 +322,8 @@
 
 <!-- Scripts -->
 @livewireScripts
+
+
 <script>
     const fullscreenButton = document.getElementById('fullscreen-button');
     const fullscreenIcon = document.getElementById('fullscreen-icon');
